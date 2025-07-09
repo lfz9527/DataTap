@@ -1,13 +1,16 @@
 import { logger } from './utils/logger'
+import Browser from './adapters/browser'
+import BrowserExtensions from './adapters/browser-extensions'
 
+// 根据不同的场景适配不同的埋点事件
 const adapters = {
-  browser: () => import('./adapters/browser'),
-  'browser-extensions': () => import('./adapters/browser-extensions'),
+  browser: Browser,
+  'browser-extensions': BrowserExtensions,
 }
 
 class TrackerSDK {
   init() {
-    logger.info('初始化')
+    logger.info('初始化', JSON.stringify(adapters))
   }
 
   track() {}
