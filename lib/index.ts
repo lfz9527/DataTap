@@ -1,19 +1,29 @@
 import { logger } from './utils/logger'
+import type { BaseConfig, AdaptersCons, AdapterCls } from './adapters/types'
 import Browser from './adapters/browser'
-import BrowserExtensions from './adapters/browser-extensions'
 
 // 根据不同的场景适配不同的埋点事件
-const adapters = {
+const adapters: Record<AdaptersCons, any> = {
   browser: Browser,
-  'browser-extensions': BrowserExtensions,
 }
 
 class TrackerSDK {
-  init() {
-    logger.info('初始化', JSON.stringify(adapters))
-  }
+  // 当前适配器
+  private actAdapter: AdapterCls | null = null
 
-  track() {}
+  init(configData: BaseConfig) {
+    const platform = configData?.config?.platform || 'browser'
+    const startDebug = configData?.config?.debug
+
+    logger.init({ debug: startDebug })
+    logger.info(`init ${platform} tracker`)
+
+    this.actAdapter = adapters[platform]
+    this.actAdapter?.init(configData)
+  }
+  track() {
+    this.actAdapter?.track()
+  }
 }
 
 const Tracker = new TrackerSDK()

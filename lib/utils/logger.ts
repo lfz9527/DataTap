@@ -1,9 +1,13 @@
+interface Props {
+  debug?: boolean
+}
+
 // 美化打印实现方法
 class PrettyLogger {
-  private isProduction: boolean
-
-  constructor() {
-    this.isProduction = process.env.NODE_ENV === 'production'
+  private debugger: boolean = false
+  init(props: Props) {
+    const { debug = false } = props
+    this.debugger = debug
   }
 
   private isEmpty(value: any): boolean {
@@ -11,7 +15,7 @@ class PrettyLogger {
   }
 
   private prettyPrint(title: string, text: string, color: string): void {
-    if (this.isProduction) return
+    if (!this.debugger) return
     console.log(
       `%c ${title} %c ${text} %c`,
       `background:${color};border:1px solid ${color}; padding: 1px; border-radius: 2px 0 0 2px; color: #fff;`,
@@ -68,7 +72,7 @@ class PrettyLogger {
   }
 
   picture(url: string, scale = 1): void {
-    if (this.isProduction) return
+    if (!this.debugger) return
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {

@@ -1,6 +1,18 @@
-import Tracker from '../lib/index'
+import TrackerSDK from '../lib/index'
 
-Tracker?.init?.()
+TrackerSDK?.init?.({
+  config: {
+    url: '',
+    debug: true,
+    platform: 'browser',
+  },
+  appInfo: {
+    app_id: 'yisa',
+  },
+  userInfo: {
+    userId: 0,
+  },
+})
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>

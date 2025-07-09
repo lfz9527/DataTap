@@ -1,3 +1,11 @@
-class BrowserTracker {}
+import type { BaseConfig, AdapterCls } from './types'
 
-export default BrowserTracker
+class Browser implements AdapterCls {
+  init(configData: BaseConfig) {}
+
+  track(): void {}
+}
+
+const browser = new Browser()
+
+export default browser
