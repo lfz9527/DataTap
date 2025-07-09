@@ -1,16 +1,19 @@
 import { defineConfig, loadEnv } from 'vite'
+import pkg from './package.json'
+
+// 名字+版本号
+const nameVersion = `${pkg.name}.${pkg.version.replace(/\./g, '-')}`
 
 export default defineConfig(({ mode, command }) => {
   // .env 文件配置
   const envConf = loadEnv(mode, process.cwd())
-  // 是否为构建
-  const isBuild = command === 'build'
 
   return {
     build: {
       lib: {
         entry: './lib/index.ts',
         name: 'Tracker',
+        fileName: (format) => `${nameVersion}.${format}.js`,
       },
       outDir: mode === 'production' ? 'dist' : `dist-${mode}`,
       minify: true,
