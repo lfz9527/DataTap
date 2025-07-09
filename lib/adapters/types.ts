@@ -1,3 +1,5 @@
+import { TrackPayload } from '../core/types'
+
 export type AdaptersCons = 'browser'
 
 export interface Storage {
@@ -28,47 +30,15 @@ export interface Config {
   platform: AdaptersCons
 }
 
-export interface AppInfo {
-  // 系统id
-  app_id: string
-  // 浏览器
-  browser?: string
-  // 浏览器版本
-  browser_version?: string
-  // 当前浏览器语言
-  browser_language?: string
-}
-
-export interface UserInfo {
-  // 用户唯一id
-  userId: number
-  // 用户名
-  userName?: string
-}
-export interface SDKInfo {
-  // sdk版本
-  sdk_version: string
-}
-
 export interface BaseConfig {
   // 埋点相关配置
   config?: Config
-  // 系统信息
-  appInfo?: AppInfo
+  // 应用id
+  app_id: string
   // 用户信息
-  userInfo?: UserInfo
-  // sdk信息
-  sdkInfo?: SDKInfo
-}
-
-// 上报配置
-export interface TrackConfig {
-  // 上报事件id 必须是唯一值
-  event_id: string
-  config?: {
-    pageUrl?: string
-    appInfo?: AppInfo
-    userInfo?: UserInfo
+  userInfo?: {
+    userId: TrackPayload['userId']
+    userName?: TrackPayload['userName']
   }
 }
 

@@ -6,11 +6,9 @@ TrackerSDK?.init?.({
     debug: true,
     platform: 'browser',
   },
-  appInfo: {
-    app_id: 'yisa',
-  },
+  app_id: 'yisa',
   userInfo: {
-    userId: 0,
+    userId: '0',
   },
 })
 
