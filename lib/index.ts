@@ -16,6 +16,7 @@ const initConfig = {
     mulTrack: false,
     maxBufferSize: 10,
     trackInterval: 5000,
+    autoStackError: true,
   },
 }
 

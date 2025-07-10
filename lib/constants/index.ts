@@ -25,4 +25,18 @@ export class TRACK_EVENT extends AirEnum {
     'performance_cls',
     '累计布局偏移'
   )
+
+  // 错误事件
+  static readonly ERROR_JS = new TRACK_EVENT(
+    'error_js',
+    'JS运行时错误（行、列、堆栈）'
+  )
+  static readonly ERROR_PROMISE = new TRACK_EVENT(
+    'error_promise',
+    'Promise 未捕获错误'
+  )
+  static readonly ERROR_STATIC = new TRACK_EVENT(
+    'error_static',
+    '静态资源加载错误'
+  )
 }

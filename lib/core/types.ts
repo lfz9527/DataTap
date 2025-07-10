@@ -40,6 +40,8 @@ export interface Config {
   storage?: Storage
   // 来源平台
   client: ClientConst
+  // 是否自动上传错误日志
+  autoStackError?: boolean
   // 是否开启批上报
   mulTrack?: boolean
   // 触发上报的最大数量
