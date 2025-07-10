@@ -82,10 +82,8 @@ class Browser implements AdapterCls {
         payload,
       }
       if (!!navigator.sendBeacon) {
-        console.log('📦 sendBeacon 被触发')
         this.TrackCore?.reportTrackBySendBeacon([eventData])
       } else {
-        console.log('📦 img 被触发')
         this.TrackCore?.reportTrackByImage([eventData])
       }
     }
