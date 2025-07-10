@@ -9,6 +9,9 @@ export default defineConfig(({ mode, command }) => {
   const envConf = loadEnv(mode, process.cwd())
 
   return {
+    define: {
+      __SDK_VERSION__: JSON.stringify(pkg.version),
+    },
     build: {
       lib: {
         entry: './lib/index.ts',
@@ -23,6 +26,12 @@ export default defineConfig(({ mode, command }) => {
       port: 5199,
       host: true,
       open: true,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+        },
+      },
     },
   }
 })
