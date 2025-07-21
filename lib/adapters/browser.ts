@@ -47,13 +47,14 @@ class Browser implements AdapterCls {
     }
 
     return {
-      platform: this.PlatformInfo,
-      userInfo,
-      screen: this.TrackCore?.GenScreenInfo(),
-      sdk: this.SDKInfo,
+      ...this.PlatformInfo,
+      ...userInfo,
+      ...this.TrackCore?.GenScreenInfo(),
+      ...this.SDKInfo,
       ...TimerInfo,
       ...CommonInfo,
       ...data,
+      ...this.TrackCore?.getAppInfo(),
     }
   }
 
@@ -62,9 +63,9 @@ class Browser implements AdapterCls {
     const payload = this.GenTrackPayload() as TrackPayload
     this.TrackCore?.reportTrack({
       event: {
-        event_type: TRACK_EVENT.PAGE_VIEW.key,
-        event_name: TRACK_EVENT.PAGE_VIEW.key,
-        local_time_ms: payload.local_time!,
+        eventType: TRACK_EVENT.PAGE_VIEW.key,
+        eventName: TRACK_EVENT.PAGE_VIEW.key,
+        localTimeMs: payload.localTime!,
       },
       payload,
     })
@@ -76,18 +77,14 @@ class Browser implements AdapterCls {
       const payload = this.GenTrackPayload() as TrackPayload
       const eventData = {
         event: {
-          event_type: TRACK_EVENT.PAGE_LEAVE.key,
-          event_name: TRACK_EVENT.PAGE_LEAVE.key,
-          local_time_ms: payload.local_time!,
+          eventType: TRACK_EVENT.PAGE_VIEW.key,
+          eventName: TRACK_EVENT.PAGE_VIEW.key,
+          localTimeMs: payload.localTime!,
         },
         payload,
       }
-
-      if (!!navigator.sendBeacon) {
-        this.TrackCore?.reportTrackBySendBeacon([eventData])
-      } else {
-        this.TrackCore?.reportTrackByImage([eventData])
-      }
+      const eventListData = [eventData]
+      this.TrackCore?.reportLastTrack(eventListData)
     }
 
     window.removeEventListener('beforeunload', handleBeforeUnload)
@@ -96,13 +93,17 @@ class Browser implements AdapterCls {
 
   track(eventData: EventInfo, data: Record<string, any> = {}): void {
     const payload = this.GenTrackPayload(data) as TrackPayload
+    const properties = eventData.properties || {}
 
     const event = {
       event: {
-        local_time_ms: payload.local_time!,
+        localTimeMs: payload.localTime!,
         ...eventData,
       },
-      payload,
+      payload: {
+        ...payload,
+        ...properties,
+      },
     }
     this.TrackCore?.reportTrack(event)
   }
@@ -123,9 +124,9 @@ class Browser implements AdapterCls {
       const payload = _this.GenTrackPayload()
 
       eventData = {
-        event_type: TRACK_EVENT.ERROR_JS.key,
-        event_name: TRACK_EVENT.ERROR_JS.key,
-        local_time_ms: payload.local_time!,
+        eventType: TRACK_EVENT.ERROR_JS.key,
+        eventName: TRACK_EVENT.ERROR_JS.key,
+        localTimeMs: payload.localTime!,
         properties: errorInfo,
       }
       _this.ErrorTrackBuffer.push({
@@ -153,9 +154,9 @@ class Browser implements AdapterCls {
           const payload = _this.GenTrackPayload()
 
           eventData = {
-            event_type: TRACK_EVENT.ERROR_STATIC.key,
-            event_name: TRACK_EVENT.ERROR_STATIC.key,
-            local_time_ms: payload.local_time!,
+            eventType: TRACK_EVENT.ERROR_STATIC.key,
+            eventName: TRACK_EVENT.ERROR_STATIC.key,
+            localTime: payload.localTime!,
             properties: errorInfo,
           }
           _this.ErrorTrackBuffer.push({
@@ -179,7 +180,7 @@ class Browser implements AdapterCls {
       eventData = {
         event_type: TRACK_EVENT.ERROR_PROMISE.key,
         event_name: TRACK_EVENT.ERROR_PROMISE.key,
-        local_time_ms: payload.local_time!,
+        localTimeMs: payload.localTime!,
         properties: errorInfo,
       }
       _this.ErrorTrackBuffer.push({
@@ -191,12 +192,7 @@ class Browser implements AdapterCls {
     // 错误日志上传， 单独处理
     const handleBeforeUnload = () => {
       if (this.ErrorTrackBuffer.length === 0) return
-
-      if (!!navigator.sendBeacon) {
-        this.TrackCore?.reportTrackBySendBeacon(this.ErrorTrackBuffer)
-      } else {
-        this.TrackCore?.reportTrackByImage(this.ErrorTrackBuffer)
-      }
+      this.TrackCore?.reportLastTrack(this.ErrorTrackBuffer)
     }
 
     // 自动上传入职

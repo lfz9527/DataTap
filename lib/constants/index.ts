@@ -1,6 +1,7 @@
 // content.js 相关行为
 import { AirEnum } from './base'
 
+// 事件类型
 export class TRACK_EVENT extends AirEnum {
   // 页面事件
   static readonly PAGE_VIEW = new TRACK_EVENT('page_view', '页面访问')

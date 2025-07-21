@@ -63,44 +63,51 @@ export interface BaseConfig {
 // 平台信息
 export interface PlatformInfo {
   // 浏览器名称
-  browser: string
+  platformBrowser: string
   // 浏览器的语言
-  browser_language?: string
+  platformBrowserLanguage?: string
   // 浏览器的 User-Agent
-  user_agent?: string
+  platformUserAgent?: string
   // 操作系统名称
-  os_name?: string
+  platformOsName?: string
   // 网络类型
-  network_type?: string
+  platformNetworkType?: string
   // 设备唯一标识符，例如浏览器指纹或生成的 UUID（用于区分设备）
-  device_id: string
+  platformDeviceId: string
   // 事件来源客户端类型，浏览器插件单独一个类型
-  client_type: ClientConst
+  platformClientType: ClientConst
 }
 
 // 用户信息
 export interface UserInfo {
   userId?: string
   userName?: string
+  inviteCode?: string
 }
 
 // SDK 信息
 export interface SDKInfo {
-  sdk_version: string
+  sdkEversion: string
+}
+
+// 应用信息
+export interface AppInfo {
+  appId: string
+  appVersion: number | string
 }
 
 // 屏幕信息
 export interface ScreenInfo {
-  screen_width: number
-  screen_height: number
+  screenWidth: number
+  screenHeight: number
 }
 
 // 时间信息
 export interface TimerInfo {
-  // 当前时间信息
-  local_time: number
+  // 实际上报时间
+  localTime: number
   // 时区
-  time_zone: string
+  timeZone: string
 }
 
 // 常用字段
@@ -108,7 +115,7 @@ export interface CommonInfo {
   // 来源页面的 URL
   referer?: string
   // 当前页面的 URL
-  current_url?: string
+  currentUrl?: string
   [key: string]: any
 }
 
@@ -123,13 +130,13 @@ export type TrackPayload = TimerInfo &
 // 事件信息
 export interface EventInfo {
   // 事件类型
-  event_type: EnumInstanceKeys<typeof TRACK_EVENT>
+  eventType: EnumInstanceKeys<typeof TRACK_EVENT>
   // 自定义事件类型
-  cus_event_type?: string
+  cusEventType?: string
   // 事件名称
-  event_name: string
+  eventName: string
   // 触发事件的本地时间
-  local_time_ms?: number
+  localTimeMs?: number
   // 其他一些参数
   properties?: Record<string, any>
 }
