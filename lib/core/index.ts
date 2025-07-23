@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import {
   TrackPayload,
   PlatformInfo,
@@ -11,6 +12,7 @@ import {
   EventInfo,
 } from './types'
 import { parserUA, getFingerprint } from '../utils/common'
+import StorageCls from '../utils/storage'
 import { logger } from '../utils/logger'
 
 interface ReportData {
@@ -19,6 +21,7 @@ interface ReportData {
 }
 
 class Core {
+  private storage: StorageCls | null = null
   private conf: BaseConfig | null = null
   private event_buffer: ReportData[] = []
   private AppInfo: AppInfo = {
@@ -27,6 +30,7 @@ class Core {
   }
 
   constructor(opt: BaseConfig) {
+    this.storage = new StorageCls(opt.config?.storage || null)
     this.conf = opt
     this.AppInfo = {
       appId: opt.app_id,
@@ -40,6 +44,8 @@ class Core {
         this.flushEvents(true) // 用 sendBeacon
       }
     })
+    // 初始化时把缓存剩余的数据给上报
+    this.trackByCache()
   }
 
   // 获取app信息
@@ -158,9 +164,9 @@ class Core {
     if (!url) {
       throw new Error('请填写上报地址')
     }
-
-    const data = JSON.stringify(event)
-    logger.info('track', data)
+    const data = this.GenTrackData(event)
+    const jsonData = JSON.stringify(data)
+    logger.info('track', jsonData)
     const img = new Image()
     img.src = `${url}?event=${encodeURIComponent(JSON.stringify(data))}`
   }
@@ -171,26 +177,26 @@ class Core {
     if (!url) {
       throw new Error('请填写上报地址')
     }
-    const data = JSON.stringify(event)
-    logger.info('track', data)
-    navigator.sendBeacon(url, data)
+
+    const data = this.GenTrackData(event)
+    const jsonData = JSON.stringify(data)
+    logger.info('track', jsonData)
+    navigator.sendBeacon(url, jsonData)
   }
 
   // 上报数据
   flushEvents(useBeacon: boolean = false) {
     const events = [...this.event_buffer]
     if (useBeacon) {
-      if (!!navigator.sendBeacon) {
-        this.reportTrackBySendBeacon(events)
-      } else {
-        this.reportTrackByImage(events)
-      }
+      this.reportLastTrack(events)
     } else {
       this.eventFetch()
     }
   }
   // 事件函数
-  eventFetch() {
+  async eventFetch() {
+    let cacheData: ReportData[] = []
+
     try {
       const url = this.getFullReportUrl()
       if (!url) {
@@ -200,51 +206,92 @@ class Core {
       this.event_buffer = []
       this.event_buffer.length = 0
 
-      // 更新实际上报时间
-      const data = eventsToSend.map((eData) => {
-        return {
-          ...eData,
-          payload: {
-            ...eData.payload,
-            ...this.GenTimerInfo(),
-          },
-        }
-      })
+      const data = this.GenTrackData(eventsToSend)
       console.log('eventsToSend', data)
-
       // 如果有自定义则执行自定义埋点上报
       if (this.conf?.config?.trackFn) {
         this.conf?.config?.trackFn(data)
         return
       }
 
+      cacheData = data
+      this.updateTrackDataCache(data)
       const body = JSON.stringify(data)
-      fetch(url, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body,
       })
-        .then((response) => {
-          if (!response.ok) {
-            logger.error(
-              '埋点上报失败:',
-              JSON.stringify({
-                status: response.status,
-                statusText: response.statusText,
-              })
-            )
-          } else {
-            logger.success('埋点上报成功', body)
-          }
-        })
-        .catch((error) => {
-          logger.error('埋点上报异常:', JSON.stringify(error))
-        })
+
+      // if (!response.ok) {
+      //   logger.error(
+      //     '埋点上报失败:',
+      //     JSON.stringify({
+      //       status: response.status,
+      //       statusText: response.statusText,
+      //     })
+      //   )
+      // } else {
+      //   logger.success('埋点上报成功', body)
+      // }
+
+      // 上报成功则删除缓存
+      const sucIds = data.map((v) => v.event.eventId)
+      this.deleteCacheTrackData(sucIds)
     } catch (error) {
       logger.error('埋点上报异常:', JSON.stringify(error))
     }
+  }
+
+  // 把缓存的数据给上报
+  trackByCache() {
+    const cacheTrack = this.storage?.get()
+      ? JSON.parse(this.storage?.get())
+      : []
+    if (cacheTrack.length === 0) return
+    this.event_buffer = [...this.event_buffer, ...cacheTrack]
+    this.eventFetch()
+  }
+
+  // 更新缓存
+  updateTrackDataCache(data: ReportData[]) {
+    const cacheTrack = this.storage?.get()
+      ? JSON.parse(this.storage?.get())
+      : []
+    this.storage?.set([...cacheTrack, ...data])
+  }
+  // 根据id 删除缓存
+  deleteCacheTrackData(ids: string[]) {
+    const cacheTrack = (
+      this.storage?.get() ? JSON.parse(this.storage?.get()) : []
+    ) as ReportData[]
+    if (cacheTrack.length === 0) return
+    const list = cacheTrack.filter(
+      (t) => t.event.eventId && ids.includes(t.event.eventId)
+    )
+    this.storage?.set(list)
+    return list
+  }
+
+  // 构建上报数据
+  GenTrackData(data: ReportData[]) {
+    return data.map((eData) => {
+      return {
+        ...eData,
+        event: {
+          ...eData.event,
+          // 构建上报id
+          eventId: uuidv4(),
+        },
+        payload: {
+          ...eData.payload,
+          // 更新实际上报时间
+          ...this.GenTimerInfo(),
+        },
+      }
+    })
   }
 }
 

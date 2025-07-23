@@ -41,3 +41,8 @@ export class TRACK_EVENT extends AirEnum {
     '静态资源加载错误'
   )
 }
+
+// 埋点缓存的key
+export enum EventCacheKey {
+  NET_EVENT_PILOT = 'net_event_pilot',
+}

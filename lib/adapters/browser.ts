@@ -1,5 +1,4 @@
 // 适配浏览器 埋点
-
 import type { AdapterCls } from './types'
 import type {
   PlatformInfo,
@@ -77,8 +76,8 @@ class Browser implements AdapterCls {
       const payload = this.GenTrackPayload() as TrackPayload
       const eventData = {
         event: {
-          eventType: TRACK_EVENT.PAGE_VIEW.key,
-          eventName: TRACK_EVENT.PAGE_VIEW.key,
+          eventType: TRACK_EVENT.PAGE_LEAVE.key,
+          eventName: TRACK_EVENT.PAGE_LEAVE.key,
           localTimeMs: payload.localTime!,
         },
         payload,

@@ -10,13 +10,13 @@ export type ClientConst =
   | 'ios'
   | 'desktop'
 
-export interface Storage {
+export interface StorageType {
   // 获取缓存
-  get: <T>(key: string) => T | null
+  get: (key?: string) => string
   // 设置缓存
-  set: (key: string, value: any) => void
+  set: (value?: any, key?: string) => void
   // 移除缓存
-  remove?: (key: string) => void
+  remove?: (key?: string) => void
 }
 
 export interface Config {
@@ -37,7 +37,7 @@ export interface Config {
   // 自定义发送请求
   trackFn?: (data: Record<string, any>) => void
   // 自定义缓存处理
-  storage?: Storage
+  storage?: StorageType
   // 来源平台
   client: ClientConst
   // 是否自动上传错误日志
@@ -129,6 +129,8 @@ export type TrackPayload = TimerInfo &
 
 // 事件信息
 export interface EventInfo {
+  // 事件id
+  eventId?: string
   // 事件类型
   eventType: EnumInstanceKeys<typeof TRACK_EVENT>
   // 自定义事件类型

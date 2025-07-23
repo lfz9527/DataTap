@@ -2,8 +2,8 @@ import TrackerSDK from '../lib/index'
 
 TrackerSDK?.init?.('browser', {
   config: {
-    baseUrl: 'http://localhost:7899',
-    src: '/api/track',
+    baseUrl: 'http://192.168.31.103:8003',
+    src: '/api/Browser/AddBrowser',
     debug: true,
     client: 'web',
   },
