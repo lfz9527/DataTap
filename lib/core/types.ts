@@ -12,9 +12,9 @@ export type ClientConst =
 
 export interface StorageType {
   // 获取缓存
-  get: (key?: string) => string
+  get: (key?: string) => Promise<string>
   // 设置缓存
-  set: (value?: any, key?: string) => void
+  set: (value?: string, key?: string) => void
   // 移除缓存
   remove?: (key?: string) => void
 }

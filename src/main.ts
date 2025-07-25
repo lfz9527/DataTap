@@ -6,6 +6,18 @@ TrackerSDK?.init?.('browser', {
     src: '/api/Browser/AddBrowser',
     debug: true,
     client: 'web',
+    // storage: {
+    //   async get(key) {
+    //     const data = localStorage.getItem(key!)
+    //     return data ?? ''
+    //   },
+    //   set(key, value) {
+    //     localStorage.setItem(key!, value ?? '')
+    //   },
+    //   remove(key) {
+    //     localStorage.removeItem(key!)
+    //   },
+    // },
   },
   app_id: 'yisa',
   app_version: '1.2.3',

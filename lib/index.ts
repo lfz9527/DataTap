@@ -25,7 +25,7 @@ class TrackerSDK {
   public Tracker: AdapterCls | null = null
 
   init(adapter: AdaptersCons, configData: BaseConfig) {
-    const mergeConf = deepMerge(configData, initConfig)
+    const mergeConf = deepMerge(initConfig, configData)
     const startDebug = configData?.config?.debug
     logger.init({ debug: startDebug })
     logger.info(`init ${adapter} tracker`)

@@ -10,8 +10,10 @@ class StorageCls implements StorageType {
     this.storage = storage || null
   }
 
-  get(key: string = EventCacheKey.NET_EVENT_PILOT) {
-    if (this.storage?.get) return this.storage?.get(key) || ''
+  async get(key: string = EventCacheKey.NET_EVENT_PILOT) {
+    if (this.storage?.get) {
+      return await this.storage?.get(key)
+    }
     return sessionStorage.getItem(key) || ''
   }
   set(value: any, key: string = EventCacheKey.NET_EVENT_PILOT) {

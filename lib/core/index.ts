@@ -195,8 +195,6 @@ class Core {
   }
   // 事件函数
   async eventFetch() {
-    let cacheData: ReportData[] = []
-
     try {
       const url = this.getFullReportUrl()
       if (!url) {
@@ -208,14 +206,13 @@ class Core {
 
       const data = this.GenTrackData(eventsToSend)
       console.log('eventsToSend', data)
+
       // 如果有自定义则执行自定义埋点上报
       if (this.conf?.config?.trackFn) {
         this.conf?.config?.trackFn(data)
         return
       }
-
-      cacheData = data
-      this.updateTrackDataCache(data)
+      await this.updateTrackDataCache(data)
       const body = JSON.stringify(data)
       const response = await fetch(url, {
         method: 'POST',
@@ -259,32 +256,27 @@ class Core {
   }
 
   // 把缓存的数据给上报
-  trackByCache() {
-    const cacheTrack = this.storage?.get()
-      ? JSON.parse(this.storage?.get())
-      : []
-    if (cacheTrack.length === 0) return
-    this.event_buffer = [...this.event_buffer, ...cacheTrack]
+  async trackByCache() {
+    const cacheTrack = await this.storage?.get()
+    const data = cacheTrack ? JSON.parse(cacheTrack) : []
+    if (data.length === 0) return
+    this.event_buffer = [...this.event_buffer, ...data]
     this.eventFetch()
   }
 
   // 更新缓存
-  updateTrackDataCache(data: ReportData[]) {
-    const cacheTrack = this.storage?.get()
-      ? JSON.parse(this.storage?.get())
-      : []
-    this.storage?.set([...cacheTrack, ...data])
+  async updateTrackDataCache(data: ReportData[]) {
+    const cacheTrack = await this.storage?.get()
+    const trackData = cacheTrack ? JSON.parse(cacheTrack) : []
+    this.storage?.set([...trackData, ...data])
   }
   // 根据id 删除缓存
-  deleteCacheTrackData(ids: string[]) {
-    console.log(ids)
-
-    const cacheTrack = (
-      this.storage?.get() ? JSON.parse(this.storage?.get()) : []
-    ) as ReportData[]
-    if (cacheTrack.length === 0) return
-    const list = cacheTrack.filter(
-      (t) => t.event.eventId && !ids.includes(t.event.eventId)
+  async deleteCacheTrackData(ids: string[]) {
+    const cacheTrack = await this.storage?.get()
+    const trackData = cacheTrack ? JSON.parse(cacheTrack) : []
+    if (trackData.length === 0) return
+    const list = trackData.filter(
+      (t: any) => t.event.eventId && !ids.includes(t.event.eventId)
     )
     this.storage?.set(list)
     return list
