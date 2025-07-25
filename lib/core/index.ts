@@ -225,17 +225,30 @@ class Core {
         body,
       })
 
-      // if (!response.ok) {
-      //   logger.error(
-      //     '埋点上报失败:',
-      //     JSON.stringify({
-      //       status: response.status,
-      //       statusText: response.statusText,
-      //     })
-      //   )
-      // } else {
-      //   logger.success('埋点上报成功', body)
-      // }
+      if (!response.ok) {
+        logger.error(
+          '埋点上报失败:',
+          JSON.stringify({
+            status: response.status,
+            statusText: response.statusText,
+          })
+        )
+        throw new Error('track fail')
+      }
+
+      const result = await response.json()
+
+      if (result?.code !== 10000) {
+        logger.error(
+          '埋点上报失败:',
+          JSON.stringify({
+            status: response.status,
+            statusText: response.statusText,
+          })
+        )
+        throw new Error('track fail')
+      }
+      logger.success('埋点上报成功', body)
 
       // 上报成功则删除缓存
       const sucIds = data.map((v) => v.event.eventId)
@@ -264,12 +277,14 @@ class Core {
   }
   // 根据id 删除缓存
   deleteCacheTrackData(ids: string[]) {
+    console.log(ids)
+
     const cacheTrack = (
       this.storage?.get() ? JSON.parse(this.storage?.get()) : []
     ) as ReportData[]
     if (cacheTrack.length === 0) return
     const list = cacheTrack.filter(
-      (t) => t.event.eventId && ids.includes(t.event.eventId)
+      (t) => t.event.eventId && !ids.includes(t.event.eventId)
     )
     this.storage?.set(list)
     return list

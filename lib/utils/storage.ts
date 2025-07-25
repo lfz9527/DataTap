@@ -16,10 +16,6 @@ class StorageCls implements StorageType {
   }
   set(value: any, key: string = EventCacheKey.NET_EVENT_PILOT) {
     const data = typeof value === 'string' ? value : JSON.stringify(value)
-
-    console.log('storage', data)
-    console.log('this.storage', this.storage)
-
     if (this.storage?.set) {
       this.storage?.set(key, data)
       return
